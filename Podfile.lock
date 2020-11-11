@@ -1,0 +1,38 @@
+PODS:
+  - Alamofire (4.9.1)
+  - APIManager (0.0.5)
+  - GzipSwift (5.1.1)
+  - SDWebImage (5.9.4):
+    - SDWebImage/Core (= 5.9.4)
+  - SDWebImage/Core (5.9.4)
+  - SwiftyJSON (5.0.0)
+  - URLRequest-cURL (0.0.3):
+    - GzipSwift
+
+DEPENDENCIES:
+  - Alamofire
+  - APIManager
+  - SDWebImage (~> 5.0)
+  - SwiftyJSON
+  - URLRequest-cURL
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - APIManager
+    - GzipSwift
+    - SDWebImage
+    - SwiftyJSON
+    - URLRequest-cURL
+
+SPEC CHECKSUMS:
+  Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
+  APIManager: 8f54a4a3f21d93068fd5e0e06b0ae6c011be29b5
+  GzipSwift: 893f3e48e597a1a4f62fafcb6514220fcf8287fa
+  SDWebImage: b69257f4ab14e9b6a2ef53e910fdf914d8f757c1
+  SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
+  URLRequest-cURL: b159525e416ead3133ae60450660b8c82d2f2aa0
+
+PODFILE CHECKSUM: 245cc622fdf70e66d54d557aaf9aab3446e3cd5f
+
+COCOAPODS: 1.9.3
