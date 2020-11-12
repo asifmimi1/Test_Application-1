@@ -19,12 +19,13 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
     var array_product_description = [String]()
     var array_product_compamnyName = [String]()
     var image_array = ""
+    var array = ""
   
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.delegate  = self
         tableView.dataSource = self
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
         getTheData()
     }
     
@@ -46,7 +47,7 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
             case .success:
                 
                 let myresponse = try? JSON(data: response.data!)
-                //print(myresponse as Any)
+                //print("hello\(myresponse as Any)")
                 
                 let resultArray = myresponse
                 self.array_product_name.removeAll()
@@ -79,31 +80,37 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
                 print(Error.self)
             }
             self.tableView.reloadData()
+            
         }
     }
+    
     @IBAction func createProductButton(_ sender: UIButton) {
         let goToCreateProductVc = storyboard?.instantiateViewController(identifier: "CreateProductVC")
         present(goToCreateProductVc!, animated: true, completion: nil)
     }
-    
+    @objc func loadList(){
+            //load data here
+            self.tableView.reloadData()
+        }
     
 }
 extension ProductVC {
-    
+
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 130
     }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return array_product_name.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
+
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? CellTableViewCell
-        
+
         cell?.productName.text = array_product_name[indexPath.row]
         cell?.productPrice.text = array_product_price[indexPath.row]
-        cell?.productImageLbl.sd_setImage(with: URL(string: image_array), completed: nil)
+        //let imageU = UserDefaults.standard.string(forKey: "url")
+        cell?.productImageLbl.sd_setImage(with: URL(string: array_product_image[indexPath.row]))
         return cell!
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -113,7 +120,8 @@ extension ProductVC {
         goToProductDetailVC?.proPrice = array_product_price[indexPath.row]
         goToProductDetailVC?.proDes = array_product_description[indexPath.row]
         goToProductDetailVC?.comName = array_product_compamnyName[indexPath.row]
-        
+        goToProductDetailVC?.proImg = array_product_image[indexPath.row]
+
     }
-    
-}
+
+    }

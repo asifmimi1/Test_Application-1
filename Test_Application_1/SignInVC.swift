@@ -46,8 +46,8 @@ class SignInVCViewController: UIViewController {
                     //print("isi: \(data)")
                     let json = JSON(data)
                     print(json["accessToken"].stringValue)
-                    print(json["auth"].boolValue)
-                    print(json["role"].stringValue)
+                    //print(json["auth"].boolValue)
+                    //print(json["role"].stringValue)
                     
                     if(self.userNameField.text == "zkrony" && self.passwordField.text == "123456"){
                         let goToProductVC = self.storyboard?.instantiateViewController(identifier: "ProductVC")
@@ -56,8 +56,8 @@ class SignInVCViewController: UIViewController {
                         let defaults = UserDefaults.standard
                         defaults.setValue(json["accessToken"].stringValue, forKey: "accesstoken")
                         //JSON.init(parseJSON: "accesstoken")
-                        let key = defaults.object(forKey: "accesstoken")
-                        print("Key 1::::::-\(key!)")
+                        defaults.object(forKey: "accesstoken")
+                        //print("Key 1::::::-\(key!)")
                         
                         self.userNameField.text = ""
                         self.passwordField.text = ""

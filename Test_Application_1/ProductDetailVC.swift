@@ -20,6 +20,7 @@ class ProductDetailVC: UIViewController {
     var proDes = ""
     var proPrice = ""
     var comName = ""
+    var proImg = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,7 +32,7 @@ class ProductDetailVC: UIViewController {
         prodPrice.text = proPrice
         prodDescription.text = proDes
         companyName.text = comName
-        prodImage.sd_setImage(with: URL(string: UserDefaults.standard.object(forKey: "url") as! String), completed: nil)
+        prodImage.sd_setImage(with: URL(string: proImg))
     }
 
 }

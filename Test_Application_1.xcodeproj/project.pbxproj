@@ -106,10 +106,10 @@
 			children = (
 				73A1602F254814E600671DD7 /* ViewController.swift */,
 				736C94D2254A8C5500B58A17 /* SignInVC.swift */,
-				736C94D8254A9F4000B58A17 /* ProductVC.swift */,
-				737D1DFA2552C1DB00153EEC /* ProductDetailVC.swift */,
-				73C8B6692553C484002AF441 /* CreateProductVC.swift */,
 				737D1DDC2552AF6800153EEC /* CellTableViewCell.swift */,
+				737D1DFA2552C1DB00153EEC /* ProductDetailVC.swift */,
+				736C94D8254A9F4000B58A17 /* ProductVC.swift */,
+				73C8B6692553C484002AF441 /* CreateProductVC.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
