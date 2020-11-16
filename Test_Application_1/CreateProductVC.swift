@@ -9,6 +9,7 @@ import UIKit
 import Alamofire
 import SwiftyJSON
 import SDWebImage
+import CoreData
 
 class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINavigationControllerDelegate{
     @IBOutlet weak var myImageView: UIImageView!
@@ -16,6 +17,7 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
     @IBOutlet weak var nameField: UITextField!
     @IBOutlet weak var priceField: UITextField!
     @IBOutlet weak var descriptionField: UITextField!
+    @IBOutlet weak var retrievedImg: UIImageView!
     let tableViewVC: ProductVC! = nil
     var imageUrl = ""
     
@@ -26,26 +28,42 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
         CreateButton.layer.cornerRadius = 20
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(DismissKeyboard))
         view.addGestureRecognizer(tap)
+        
     }
     
     @objc func DismissKeyboard(){
         view.endEditing(true)
     }
-    
+    // MARK:- Create Product Button
     @IBAction func createProductButton(_ sender: UIButton) {
         
         //http://192.168.80.21:3204/api/product/create
         alamofireRequest(requestURL: "http://192.168.80.21:3204/api/product/create")
         UPLOD()
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
-        navigationController?.popViewController(animated: true)
-        dismiss(animated: true, completion: nil)
+        // MARK:- Connectivity Manager
+        if CheckInternet.Connection(){
+            //self.Alert(Message: "Connected")
+            print("Network Connection Available")
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
+            navigationController?.popViewController(animated: true)
+            dismiss(animated: true, completion: nil)
+            retrievedImg.image = loadImageFromDiskWith(fileName: "newImg")
+        }
+        else{
+            //self.Alert(Message: "Your Device is not connected with internet")
+            save(name: nameField.text!, proDescription: descriptionField.text!, price: priceField.text!, imageName: "newImg")
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
+            navigationController?.popViewController(animated: true)
+            dismiss(animated: true, completion: nil)
+        }
+        
     }
     
     @IBAction func selectImageButton(_ sender: UIButton) {
         imagePick()
     }
     
+    //MARK:- Image Picker
     func imagePick() {
         let imagePicker = UIImagePickerController()
         imagePicker.delegate = self
@@ -61,18 +79,62 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
             myImageView.image = originalImage
         }
     }
+    // MARK:- Save image to File System
+    func saveImage(imageName: String, image: UIImage) {
+        guard let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+        
+        let fileName = imageName
+        let fileURL = documentsDirectory.appendingPathComponent(fileName)
+        guard let data = image.jpegData(compressionQuality: 1) else { return }
+        //Checks if file exists, removes it if so.
+        if FileManager.default.fileExists(atPath: fileURL.path) {
+            do {
+                try FileManager.default.removeItem(atPath: fileURL.path)
+                print("Removed old image")
+            } catch let removeError {
+                print("couldn't remove file at path", removeError)
+            }
+        }
+        do {
+            try data.write(to: fileURL)
+        } catch let error {
+            print("error saving file with error", error)
+        }
+    }
+    // MARK:- Core Data- Create
+    func save(name: String, proDescription: String, price: String, imageName: String) {
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
+            return
+        }
+        let managedContext = appDelegate.persistentContainer.viewContext
+        let entity = NSEntityDescription.entity(forEntityName: "Profile",in: managedContext)!
+        let profile = NSManagedObject(entity: entity,insertInto: managedContext)
+        
+        profile.setValue(name, forKeyPath: "name")
+        profile.setValue(price, forKey: "price")
+        profile.setValue(proDescription, forKey: "proDescription")
+        profile.setValue(imageName, forKey: "imageName")
+        
+        do {
+            try managedContext.save()
+        } catch let error as NSError {
+            print("Could not save. \(error), \(error.userInfo)")
+        }
+    }
+    
+    // MARK:- Create product Alamofire Post, with image
     func UPLOD(){
         let image  = myImageView.image!
         let serviceName = "http://192.168.80.21:8800/api/v1/upload/uploadfile"
         var parameters = [String: AnyObject]()
         parameters["Folder"] = "uploadfile" as AnyObject?
-        parameters["Filename"] = "Asif" as AnyObject?
+        parameters["Filename"] = "rabbii" as AnyObject?
         parameters["Ext"] = "png" as AnyObject?
         
+        save(name: nameField.text!, proDescription: descriptionField.text!, price: priceField.text!, imageName: "newImg")
         let profileImageData = image
         if let imageData = profileImageData.jpegData(compressionQuality: 0.5) {
             parameters["FileToUpload"] = imageData as AnyObject?
-            
         } else {
             print("Image problem")
         }
@@ -84,6 +146,8 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
         let headers: HTTPHeaders = [
             "x-access-token": token
         ]
+        
+        saveImage(imageName: "newImg", image: myImageView.image!)
         
         Alamofire.upload(multipartFormData: { (multipartFormData:MultipartFormData) in
             for (key, value) in parameters {
@@ -100,7 +164,6 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
                 }
             }
         }, usingThreshold: 1, to: serviceName, method: .post, headers: headers) { (encodingResult:SessionManager.MultipartFormDataEncodingResult) in
-            
             switch encodingResult {
             case .success(let upload, _, _):
                 upload.responseJSON { [self] response in
@@ -119,10 +182,6 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
                     
                     if let data = response.result.value {
                         let _ = JSON(data)
-                        
-                        //print(json["ImagePath"].stringValue)
-                        //                                completionHandler(json,nil)
-                        //print(json)
                     }
                 }
                 break
@@ -134,7 +193,7 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
         }
     }
     
-    
+    // MARK:- Get product with Alamofire Get
     func alamofireRequest(requestURL: String) {
         guard let imageU = UserDefaults.standard.string(forKey: "imageURL") else {
             return
@@ -168,7 +227,27 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
                 case .failure(let error):
                     print("need text")
                     print("Request failed with error: \(error)")
+                    
                 }
             }
+    }
+    
+    func Alert (Message: String){
+        let alert = UIAlertController(title: "Alert", message: Message, preferredStyle: UIAlertController.Style.alert)
+        alert.addAction(UIAlertAction(title: "ok", style: UIAlertAction.Style.default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    func loadImageFromDiskWith(fileName: String) -> UIImage? {
+        let documentDirectory = FileManager.SearchPathDirectory.documentDirectory
+        let userDomainMask = FileManager.SearchPathDomainMask.userDomainMask
+        let paths = NSSearchPathForDirectoriesInDomains(documentDirectory, userDomainMask, true)
+        
+        if let dirPath = paths.first {
+            let imageUrl = URL(fileURLWithPath: dirPath).appendingPathComponent(fileName)
+            let image = UIImage(contentsOfFile: imageUrl.path)
+            return image
+        }
+        return nil
     }
 }

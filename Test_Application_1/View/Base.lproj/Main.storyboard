@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="lHn-7g-jDT">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="77K-6O-Al3">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17126"/>
@@ -418,24 +418,42 @@
                                     <constraint firstAttribute="height" constant="143" id="k7E-wG-xst"/>
                                 </constraints>
                             </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="FVR-uf-S7i">
+                                <rect key="frame" x="67" y="495" width="241" height="128"/>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9sa-gQ-Z8j">
+                                <rect key="frame" x="145" y="456" width="84" height="33"/>
+                                <color key="backgroundColor" systemColor="systemBlueColor"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="17"/>
+                                <state key="normal" title="Get Image">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="SaE-dy-yf6"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="W4q-qB-0au" firstAttribute="top" secondItem="22t-bE-2Vy" secondAttribute="bottom" constant="12" id="0eq-k1-eNf"/>
                             <constraint firstAttribute="trailing" secondItem="22t-bE-2Vy" secondAttribute="trailing" id="2Ag-MS-CW7"/>
+                            <constraint firstItem="FVR-uf-S7i" firstAttribute="top" secondItem="6dH-5d-7AI" secondAttribute="bottom" constant="47" id="8gJ-S6-UEj"/>
                             <constraint firstItem="Hnw-tJ-7y9" firstAttribute="top" secondItem="22t-bE-2Vy" secondAttribute="top" id="AEc-Bf-dfK"/>
                             <constraint firstItem="Hnw-tJ-7y9" firstAttribute="leading" secondItem="FDD-Nw-e1O" secondAttribute="leadingMargin" id="OIV-8C-oEs"/>
                             <constraint firstItem="Hnw-tJ-7y9" firstAttribute="top" secondItem="SaE-dy-yf6" secondAttribute="top" constant="50" id="OXH-dn-B4e"/>
                             <constraint firstItem="6dH-5d-7AI" firstAttribute="top" secondItem="R2c-bx-jZ2" secondAttribute="bottom" constant="8" symbolic="YES" id="QEi-Wd-OPU"/>
+                            <constraint firstItem="9sa-gQ-Z8j" firstAttribute="centerX" secondItem="6dH-5d-7AI" secondAttribute="centerX" id="WIA-Uk-9Ts"/>
                             <constraint firstAttribute="bottom" secondItem="22t-bE-2Vy" secondAttribute="bottom" constant="478" id="XTS-hC-T54"/>
                             <constraint firstItem="6dH-5d-7AI" firstAttribute="leading" secondItem="Hnw-tJ-7y9" secondAttribute="leading" id="Xff-Ao-ibK"/>
+                            <constraint firstItem="9sa-gQ-Z8j" firstAttribute="leading" secondItem="SaE-dy-yf6" secondAttribute="leading" constant="145" id="YQS-xZ-Yel"/>
+                            <constraint firstItem="FVR-uf-S7i" firstAttribute="centerX" secondItem="6dH-5d-7AI" secondAttribute="centerX" id="bnF-CA-lWr"/>
                             <constraint firstItem="6dH-5d-7AI" firstAttribute="centerX" secondItem="R2c-bx-jZ2" secondAttribute="centerX" id="dE1-TB-mU6"/>
                             <constraint firstItem="22t-bE-2Vy" firstAttribute="leading" secondItem="Hnw-tJ-7y9" secondAttribute="trailing" constant="92" id="dhE-wn-6S9"/>
                             <constraint firstItem="W4q-qB-0au" firstAttribute="leading" secondItem="SaE-dy-yf6" secondAttribute="leading" constant="67" id="gCz-Qd-b69"/>
+                            <constraint firstItem="FVR-uf-S7i" firstAttribute="trailing" secondItem="W4q-qB-0au" secondAttribute="trailing" id="gEb-fl-5Kv"/>
                             <constraint firstItem="W4q-qB-0au" firstAttribute="centerX" secondItem="R2c-bx-jZ2" secondAttribute="centerX" id="ivj-cj-ueI"/>
                             <constraint firstItem="W4q-qB-0au" firstAttribute="top" secondItem="Hnw-tJ-7y9" secondAttribute="bottom" constant="19" id="jkL-Br-Rdn"/>
+                            <constraint firstItem="9sa-gQ-Z8j" firstAttribute="top" secondItem="6dH-5d-7AI" secondAttribute="bottom" constant="8" symbolic="YES" id="p7d-Rv-qyn"/>
                             <constraint firstItem="SaE-dy-yf6" firstAttribute="bottom" secondItem="6dH-5d-7AI" secondAttribute="bottom" constant="219" id="uPy-CK-hHh"/>
+                            <constraint firstItem="SaE-dy-yf6" firstAttribute="bottom" secondItem="FVR-uf-S7i" secondAttribute="bottom" constant="44" id="xxl-7k-XhE"/>
                             <constraint firstItem="6dH-5d-7AI" firstAttribute="trailing" secondItem="FDD-Nw-e1O" secondAttribute="trailingMargin" id="zVu-mC-xTx"/>
                         </constraints>
                     </view>
@@ -445,6 +463,7 @@
                         <outlet property="myImageView" destination="W4q-qB-0au" id="wSz-uc-PkU"/>
                         <outlet property="nameField" destination="bOs-uL-fdT" id="xZJ-kU-Q22"/>
                         <outlet property="priceField" destination="rzg-6W-efI" id="etR-EA-wBP"/>
+                        <outlet property="retrievedImg" destination="FVR-uf-S7i" id="Xpo-BJ-8GW"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="yd8-G6-jTk" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

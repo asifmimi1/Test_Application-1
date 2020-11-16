@@ -9,6 +9,7 @@ import UIKit
 import Alamofire
 import SwiftyJSON
 import SDWebImage
+import CoreData
 
 class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
     
@@ -20,6 +21,10 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
     var array_product_compamnyName = [String]()
     var image_array = ""
     var array = ""
+    
+    var nameProduct = ""
+    var priceProduct = ""
+    var descriptionProduct = ""
   
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,8 +32,17 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
         tableView.dataSource = self
         NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
         getTheData()
+        fetchData()
+        
+        if CheckInternet.Connection(){
+           UPLOAD()
+            alamofireRequest(requestURL: "http://192.168.80.21:3204/api/product/create")
+        }
+        else{
+            print("Network Connection is not Available")
+        }
     }
-    
+   
     func getTheData() {
         
         //print("Hello dear ::::::::::-\(accesstoken as Any)")
@@ -89,11 +103,28 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
         present(goToCreateProductVc!, animated: true, completion: nil)
     }
     @objc func loadList(){
-            //load data here
             self.tableView.reloadData()
         }
-    
+    // MARK:- Core Data- Retrieve
+    func fetchData(){
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
+        let manageContent = appDelegate.persistentContainer.viewContext
+        let fetchData = NSFetchRequest<NSFetchRequestResult>(entityName: "Profile")
+        do {
+            let result = try manageContent.fetch(fetchData)
+            for data in result as! [NSManagedObject]{
+//                print(data.value(forKeyPath: "name") as Any)
+//                print(data.value(forKeyPath: "price") as Any)
+                nameProduct = data.value(forKeyPath: "name") as Any as! String
+                priceProduct = data.value(forKeyPath: "price") as Any as! String
+                descriptionProduct = data.value(forKeyPath: "proDescription") as Any as! String
+            }
+        }catch {
+            print("err")
+        }
+    }
 }
+// MARK:- TableView
 extension ProductVC {
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -125,3 +156,111 @@ extension ProductVC {
     }
 
     }
+// MARK:- Network Requests
+extension ProductVC{
+    func UPLOAD(){
+        //let image  = myImageView.image!
+        let serviceName = "http://192.168.80.21:8800/api/v1/upload/uploadfile"
+        var parameters = [String: AnyObject]()
+        parameters["Folder"] = "uploadfile" as AnyObject?
+        parameters["Filename"] = "rabbii" as AnyObject?
+        parameters["Ext"] = "png" as AnyObject?
+        
+//        let profileImageData = image
+//        if let imageData = profileImageData.jpegData(compressionQuality: 0.5) {
+//            parameters["FileToUpload"] = imageData as AnyObject?
+//        } else {
+//            print("Image problem")
+//        }
+        
+        guard let token = UserDefaults.standard.string(forKey: "accesstoken") else {
+            return
+        }
+        print("Create button ACCESS KEY::::- \(token)")
+        let headers: HTTPHeaders = [
+            "x-access-token": token
+        ]
+        
+//        saveImage(imageName: "newImg", image: myImageView.image!)
+        
+        Alamofire.upload(multipartFormData: { (multipartFormData:MultipartFormData) in
+            for (key, value) in parameters {
+                if key == "FileToUpload" {
+                    multipartFormData.append(
+                        value as! Data,
+                        withName: key,
+                        fileName: "swift_file.png",
+                        mimeType: "image/png"
+                    )
+                } else {
+                    //Data other than image
+                    multipartFormData.append((value as! String).data(using: .utf8)!, withName: key)
+                }
+            }
+        }, usingThreshold: 1, to: serviceName, method: .post, headers: headers) { (encodingResult:SessionManager.MultipartFormDataEncodingResult) in
+            switch encodingResult {
+            case .success(let upload, _, _):
+                upload.responseJSON { [] response in
+                    
+                    if let Response = response.result.value as? [String : Any],
+                       let myData = Response["data"] as? [String : Any],
+                       let imgPath = myData["ImagePath"]  {
+//                        imageUrl = imgPath as! String
+                        //print(imageUrl)
+                        //print("ImagePath --> ", imgPath)
+                        let defaults = UserDefaults.standard
+//                        defaults.setValue(imageUrl, forKey: "imageURL")
+//                        let key = defaults.object(forKey: "imageURL")
+//                        print(key as Any)
+                    }
+                    if let data = response.result.value {
+                        let _ = JSON(data)
+                    }
+                }
+                break
+            case .failure(let encodingError):
+                print(encodingError)
+                break
+            }
+        }
+    }
+    // MARK:- Get product with Alamofire Get
+    func alamofireRequest(requestURL: String) {
+//        guard let imageU = UserDefaults.standard.string(forKey: "imageURL") else {
+//            return
+//        }
+        let parameters: [String: Any] = [
+            "product_name" : nameProduct,
+            "price" : priceProduct,
+            "description" : descriptionProduct,
+            "company_id" : "27",
+            "category_id" : "1",
+            "sub_category_id" : "1",
+            "image_url" : "https://cdn-test.octopitech.com.bd/uploadfile/rabbii.png",
+            "date_entered" : "2020-02-20"
+        ]
+        guard let token = UserDefaults.standard.string(forKey: "accesstoken") else {
+            return
+        }
+        print("Create button ACCESS KEY::::- \(token)")
+        let headers = [
+            "x-access-token": token,
+        ]
+        Alamofire.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers)
+            .responseString { response in
+                
+                
+                switch response.result {
+                
+                case .success(let data):
+                    //print("isi: \(data)")
+                    _ = JSON(data)
+                    
+                case .failure(let error):
+                    print("need text")
+                    print("Request failed with error: \(error)")
+                    
+                }
+            }
+    }
+}
