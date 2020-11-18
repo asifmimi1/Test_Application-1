@@ -21,11 +21,12 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
     var array_product_compamnyName = [String]()
     var image_array = ""
     var array = ""
+    var count = 0
+    var nameProduct = [String]()
+    var priceProduct = [String]()
+    var descriptionProduct = [String]()
+
     
-    var nameProduct = ""
-    var priceProduct = ""
-    var descriptionProduct = ""
-  
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.delegate  = self
@@ -35,14 +36,25 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
         fetchData()
         
         if CheckInternet.Connection(){
-           UPLOAD()
-            alamofireRequest(requestURL: "http://192.168.80.21:3204/api/product/create")
+            
+            for _ in 0..<nameProduct.count{
+                
+                print(count)
+                UPLOAD()
+                alamofireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count])
+                count += 1
+                print(count)
+            }
+            //            DispatchQueue.main.async { [self] in
+            deleteData()
+            //            }
+            
         }
         else{
             print("Network Connection is not Available")
         }
     }
-   
+    
     func getTheData() {
         
         //print("Hello dear ::::::::::-\(accesstoken as Any)")
@@ -103,8 +115,8 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
         present(goToCreateProductVc!, animated: true, completion: nil)
     }
     @objc func loadList(){
-            self.tableView.reloadData()
-        }
+        self.tableView.reloadData()
+    }
     // MARK:- Core Data- Retrieve
     func fetchData(){
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
@@ -113,34 +125,59 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
         do {
             let result = try manageContent.fetch(fetchData)
             for data in result as! [NSManagedObject]{
-//                print(data.value(forKeyPath: "name") as Any)
-//                print(data.value(forKeyPath: "price") as Any)
-                nameProduct = data.value(forKeyPath: "name") as Any as! String
-                priceProduct = data.value(forKeyPath: "price") as Any as! String
-                descriptionProduct = data.value(forKeyPath: "proDescription") as Any as! String
+                //                nameProduct = data.value(forKeyPath: "name") as Any as! String
+                //                priceProduct = data.value(forKeyPath: "price") as Any as! String
+                //                descriptionProduct = data.value(forKeyPath: "proDescription") as Any as! String
+                //
+                nameProduct.append(data.value(forKey: "name") as Any as! String)
+                priceProduct.append(data.value(forKey: "price") as Any as! String)
+                descriptionProduct.append(data.value(forKey: "proDescription") as Any as! String)
+                
+                
             }
+            //            print("Name:- \(nameProduct[0])")
+            //            print("Name:- \(nameProduct[1])")
+            print(nameProduct)
+            print(priceProduct)
         }catch {
             print("err")
+        }
+    }
+    
+    // MARK:- Core Data- Delete
+    func deleteData() {
+        let appDel:AppDelegate = (UIApplication.shared.delegate as! AppDelegate)
+        let context:NSManagedObjectContext = appDel.persistentContainer.viewContext
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Profile")
+        fetchRequest.returnsObjectsAsFaults = false
+        do {
+            let results = try context.fetch(fetchRequest)
+            for managedObject in results {
+                if let managedObjectData: NSManagedObject = managedObject as? NSManagedObject {
+                    context.delete(managedObjectData)
+                }
+            }
+        } catch let error as NSError {
+            print("Deleted all my data in myEntity error : \(error) \(error.userInfo)")
         }
     }
 }
 // MARK:- TableView
 extension ProductVC {
-
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 130
     }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return array_product_name.count
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? CellTableViewCell
-
+        
         cell?.productName.text = array_product_name[indexPath.row]
         cell?.productPrice.text = array_product_price[indexPath.row]
-        //let imageU = UserDefaults.standard.string(forKey: "url")
         cell?.productImageLbl.sd_setImage(with: URL(string: array_product_image[indexPath.row]))
         return cell!
     }
@@ -152,10 +189,10 @@ extension ProductVC {
         goToProductDetailVC?.proDes = array_product_description[indexPath.row]
         goToProductDetailVC?.comName = array_product_compamnyName[indexPath.row]
         goToProductDetailVC?.proImg = array_product_image[indexPath.row]
-
+        
     }
-
-    }
+    
+}
 // MARK:- Network Requests
 extension ProductVC{
     func UPLOAD(){
@@ -166,22 +203,21 @@ extension ProductVC{
         parameters["Filename"] = "rabbii" as AnyObject?
         parameters["Ext"] = "png" as AnyObject?
         
-//        let profileImageData = image
-//        if let imageData = profileImageData.jpegData(compressionQuality: 0.5) {
-//            parameters["FileToUpload"] = imageData as AnyObject?
-//        } else {
-//            print("Image problem")
-//        }
+        //        let profileImageData = image
+        //        if let imageData = profileImageData.jpegData(compressionQuality: 0.5) {
+        //            parameters["FileToUpload"] = imageData as AnyObject?
+        //        } else {
+        //            print("Image problem")
+        //        }
         
         guard let token = UserDefaults.standard.string(forKey: "accesstoken") else {
             return
         }
-        print("Create button ACCESS KEY::::- \(token)")
         let headers: HTTPHeaders = [
             "x-access-token": token
         ]
         
-//        saveImage(imageName: "newImg", image: myImageView.image!)
+        //        saveImage(imageName: "newImg", image: myImageView.image!)
         
         Alamofire.upload(multipartFormData: { (multipartFormData:MultipartFormData) in
             for (key, value) in parameters {
@@ -205,13 +241,13 @@ extension ProductVC{
                     if let Response = response.result.value as? [String : Any],
                        let myData = Response["data"] as? [String : Any],
                        let imgPath = myData["ImagePath"]  {
-//                        imageUrl = imgPath as! String
+                        //                        imageUrl = imgPath as! String
                         //print(imageUrl)
                         //print("ImagePath --> ", imgPath)
                         let defaults = UserDefaults.standard
-//                        defaults.setValue(imageUrl, forKey: "imageURL")
-//                        let key = defaults.object(forKey: "imageURL")
-//                        print(key as Any)
+                        //                        defaults.setValue(imageUrl, forKey: "imageURL")
+                        //                        let key = defaults.object(forKey: "imageURL")
+                        //                        print(key as Any)
                     }
                     if let data = response.result.value {
                         let _ = JSON(data)
@@ -225,14 +261,18 @@ extension ProductVC{
         }
     }
     // MARK:- Get product with Alamofire Get
-    func alamofireRequest(requestURL: String) {
-//        guard let imageU = UserDefaults.standard.string(forKey: "imageURL") else {
-//            return
-//        }
+    func alamofireRequest(requestURL: String, name: String, price: String, descrip: String) {
+        //        guard let imageU = UserDefaults.standard.string(forKey: "imageURL") else {
+        //            return
+        //        //        }
+        //        for i in nameProduct{
+        //            print(i)
+        //        }
+        
         let parameters: [String: Any] = [
-            "product_name" : nameProduct,
-            "price" : priceProduct,
-            "description" : descriptionProduct,
+            "product_name" : name,
+            "price" : price,
+            "description" : descrip,
             "company_id" : "27",
             "category_id" : "1",
             "sub_category_id" : "1",
@@ -242,7 +282,6 @@ extension ProductVC{
         guard let token = UserDefaults.standard.string(forKey: "accesstoken") else {
             return
         }
-        print("Create button ACCESS KEY::::- \(token)")
         let headers = [
             "x-access-token": token,
         ]

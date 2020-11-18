@@ -47,7 +47,7 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
             navigationController?.popViewController(animated: true)
             dismiss(animated: true, completion: nil)
-            retrievedImg.image = loadImageFromDiskWith(fileName: "newImg")
+            //retrievedImg.image = loadImageFromDiskWith(fileName: "newImg")
         }
         else{
             //self.Alert(Message: "Your Device is not connected with internet")
@@ -128,10 +128,10 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
         let serviceName = "http://192.168.80.21:8800/api/v1/upload/uploadfile"
         var parameters = [String: AnyObject]()
         parameters["Folder"] = "uploadfile" as AnyObject?
-        parameters["Filename"] = "rabbii" as AnyObject?
-        parameters["Ext"] = "png" as AnyObject?
+        parameters["Filename"] = "AsifRabbi" as AnyObject?
+        parameters["Ext"] = "jpg" as AnyObject?
         
-        save(name: nameField.text!, proDescription: descriptionField.text!, price: priceField.text!, imageName: "newImg")
+        //save(name: nameField.text!, proDescription: descriptionField.text!, price: priceField.text!, imageName: "newImg")
         let profileImageData = image
         if let imageData = profileImageData.jpegData(compressionQuality: 0.5) {
             parameters["FileToUpload"] = imageData as AnyObject?
@@ -155,8 +155,8 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
                     multipartFormData.append(
                         value as! Data,
                         withName: key,
-                        fileName: "swift_file.png",
-                        mimeType: "image/png"
+                        fileName: "swift_file.jpg",
+                        mimeType: "image/jpg"
                     )
                 } else {
                     //Data other than image
@@ -211,7 +211,6 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
         guard let token = UserDefaults.standard.string(forKey: "accesstoken") else {
             return
         }
-        print("Create button ACCESS KEY::::- \(token)")
         let headers = [
             "x-access-token": token,
         ]
