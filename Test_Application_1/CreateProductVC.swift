@@ -20,6 +20,10 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
     @IBOutlet weak var retrievedImg: UIImageView!
     let tableViewVC: ProductVC! = nil
     var imageUrl = ""
+    var nameProduct = [String]()
+    var priceProduct = [String]()
+    var descriptionProduct = [String]()
+    var count = 0
     
     
     override func viewDidLoad() {
@@ -28,7 +32,7 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
         CreateButton.layer.cornerRadius = 20
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(DismissKeyboard))
         view.addGestureRecognizer(tap)
-        
+        fetchData()
     }
     
     @objc func DismissKeyboard(){
@@ -38,10 +42,19 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
     @IBAction func createProductButton(_ sender: UIButton) {
         
         //http://192.168.80.21:3204/api/product/create
-        alamofireRequest(requestURL: "http://192.168.80.21:3204/api/product/create")
-        UPLOD()
+        
         // MARK:- Connectivity Manager
         if CheckInternet.Connection(){
+            for _ in 0..<nameProduct.count{
+                print(count)
+                UPLOAD()
+                alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count])
+                count += 1
+                print(count)
+            }
+            //            DispatchQueue.main.async { [self] in
+            deleteData()
+            //            }
             //self.Alert(Message: "Connected")
             print("Network Connection Available")
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
@@ -56,7 +69,155 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
             navigationController?.popViewController(animated: true)
             dismiss(animated: true, completion: nil)
         }
+        alamofireRequest(requestURL: "http://192.168.80.21:3204/api/product/create")
+        UPLOD()
+    }
+    func UPLOAD(){
+        //let image  = myImageView.image!
+        let serviceName = "http://192.168.80.21:8800/api/v1/upload/uploadfile"
+        var parameters = [String: AnyObject]()
+        parameters["Folder"] = "uploadfile" as AnyObject?
+        parameters["Filename"] = "rabbii" as AnyObject?
+        parameters["Ext"] = "png" as AnyObject?
         
+        //        let profileImageData = image
+        //        if let imageData = profileImageData.jpegData(compressionQuality: 0.5) {
+        //            parameters["FileToUpload"] = imageData as AnyObject?
+        //        } else {
+        //            print("Image problem")
+        //        }
+        
+        guard let token = UserDefaults.standard.string(forKey: "accesstoken") else {
+            return
+        }
+        let headers: HTTPHeaders = [
+            "x-access-token": token
+        ]
+        
+        //        saveImage(imageName: "newImg", image: myImageView.image!)
+        
+        Alamofire.upload(multipartFormData: { (multipartFormData:MultipartFormData) in
+            for (key, value) in parameters {
+                if key == "FileToUpload" {
+                    multipartFormData.append(
+                        value as! Data,
+                        withName: key,
+                        fileName: "swift_file.png",
+                        mimeType: "image/png"
+                    )
+                } else {
+                    //Data other than image
+                    multipartFormData.append((value as! String).data(using: .utf8)!, withName: key)
+                }
+            }
+        }, usingThreshold: 1, to: serviceName, method: .post, headers: headers) { (encodingResult:SessionManager.MultipartFormDataEncodingResult) in
+            switch encodingResult {
+            case .success(let upload, _, _):
+                upload.responseJSON { [] response in
+                    
+                    if let Response = response.result.value as? [String : Any],
+                       let myData = Response["data"] as? [String : Any],
+                       let imgPath = myData["ImagePath"]  {
+                        //                        imageUrl = imgPath as! String
+                        //print(imageUrl)
+                        //print("ImagePath --> ", imgPath)
+                        let defaults = UserDefaults.standard
+                        //                        defaults.setValue(imageUrl, forKey: "imageURL")
+                        //                        let key = defaults.object(forKey: "imageURL")
+                        //                        print(key as Any)
+                    }
+                    if let data = response.result.value {
+                        let _ = JSON(data)
+                    }
+                }
+                break
+            case .failure(let encodingError):
+                print(encodingError)
+                break
+            }
+        }
+    }
+    func alamoFireRequest(requestURL: String, name: String, price: String, descrip: String) {
+        //        guard let imageU = UserDefaults.standard.string(forKey: "imageURL") else {
+        //            return
+        //        //        }
+        //        for i in nameProduct{
+        //            print(i)
+        //        }
+        
+        let parameters: [String: Any] = [
+            "product_name" : name,
+            "price" : price,
+            "description" : descrip,
+            "company_id" : "27",
+            "category_id" : "1",
+            "sub_category_id" : "1",
+            "image_url" : "https://cdn-test.octopitech.com.bd/uploadfile/rabbii.png",
+            "date_entered" : "2020-02-20"
+        ]
+        guard let token = UserDefaults.standard.string(forKey: "accesstoken") else {
+            return
+        }
+        let headers = [
+            "x-access-token": token,
+        ]
+        Alamofire.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers)
+            .responseString { response in
+                
+                
+                switch response.result {
+                
+                case .success(let data):
+                    //print("isi: \(data)")
+                    _ = JSON(data)
+                    
+                case .failure(let error):
+                    print("need text")
+                    print("Request failed with error: \(error)")
+                    
+                }
+            }
+    }
+    func fetchData(){
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
+        let manageContent = appDelegate.persistentContainer.viewContext
+        let fetchData = NSFetchRequest<NSFetchRequestResult>(entityName: "Profile")
+        do {
+            let result = try manageContent.fetch(fetchData)
+            for data in result as! [NSManagedObject]{
+                //                nameProduct = data.value(forKeyPath: "name") as Any as! String
+                //                priceProduct = data.value(forKeyPath: "price") as Any as! String
+                //                descriptionProduct = data.value(forKeyPath: "proDescription") as Any as! String
+                //
+                nameProduct.append(data.value(forKey: "name") as Any as! String)
+                priceProduct.append(data.value(forKey: "price") as Any as! String)
+                descriptionProduct.append(data.value(forKey: "proDescription") as Any as! String)
+                
+                
+            }
+            //            print("Name:- \(nameProduct[0])")
+            //            print("Name:- \(nameProduct[1])")
+            print(nameProduct)
+            print(priceProduct)
+        }catch {
+            print("err")
+        }
+    }
+    func deleteData() {
+        let appDel:AppDelegate = (UIApplication.shared.delegate as! AppDelegate)
+        let context:NSManagedObjectContext = appDel.persistentContainer.viewContext
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Profile")
+        fetchRequest.returnsObjectsAsFaults = false
+        do {
+            let results = try context.fetch(fetchRequest)
+            for managedObject in results {
+                if let managedObjectData: NSManagedObject = managedObject as? NSManagedObject {
+                    context.delete(managedObjectData)
+                }
+            }
+        } catch let error as NSError {
+            print("Deleted all my data in myEntity error : \(error) \(error.userInfo)")
+        }
     }
     
     @IBAction func selectImageButton(_ sender: UIButton) {

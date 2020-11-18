@@ -25,7 +25,7 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
     var nameProduct = [String]()
     var priceProduct = [String]()
     var descriptionProduct = [String]()
-
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,10 +38,9 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
         if CheckInternet.Connection(){
             
             for _ in 0..<nameProduct.count{
-                
                 print(count)
                 UPLOAD()
-                alamofireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count])
+                alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count])
                 count += 1
                 print(count)
             }
@@ -261,7 +260,7 @@ extension ProductVC{
         }
     }
     // MARK:- Get product with Alamofire Get
-    func alamofireRequest(requestURL: String, name: String, price: String, descrip: String) {
+    func alamoFireRequest(requestURL: String, name: String, price: String, descrip: String) {
         //        guard let imageU = UserDefaults.standard.string(forKey: "imageURL") else {
         //            return
         //        //        }
