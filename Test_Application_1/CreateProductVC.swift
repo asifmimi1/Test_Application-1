@@ -24,6 +24,7 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
     var priceProduct = [String]()
     var descriptionProduct = [String]()
     var count = 0
+    var proVC: ProductVC!
     
     
     override func viewDidLoad() {
@@ -33,7 +34,11 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(DismissKeyboard))
         view.addGestureRecognizer(tap)
         fetchData()
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
     }
+//    @IBAction func CloseButton(_ sender: Any) {
+//            self.dismiss(animated: true, completion: nil)
+//        }
     
     @objc func DismissKeyboard(){
         view.endEditing(true)
@@ -45,18 +50,29 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
         
         // MARK:- Connectivity Manager
         if CheckInternet.Connection(){
-            for _ in 0..<nameProduct.count{
-                print(count)
-                UPLOAD()
-                alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count])
-                count += 1
-                print(count)
+            if nameProduct.count != 0{
+                for _ in 0..<nameProduct.count{
+                    print(count)
+                    UPLOAD()
+                    alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count])
+                    count += 1
+                    print(count)
+                }
+                
+                DispatchQueue.main.async { [self] in
+                    deleteData()
+                }
+                alamofireRequest(requestURL: "http://192.168.80.21:3204/api/product/create")
+                UPLOD()
+            }else{
+                alamofireRequest(requestURL: "http://192.168.80.21:3204/api/product/create")
+                UPLOD()
             }
-            //            DispatchQueue.main.async { [self] in
-            deleteData()
-            //            }
+            
+            
             //self.Alert(Message: "Connected")
             print("Network Connection Available")
+//            proVC.tableViewReloadFromCreateProductVC()
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
             navigationController?.popViewController(animated: true)
             dismiss(animated: true, completion: nil)
@@ -69,16 +85,15 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
             navigationController?.popViewController(animated: true)
             dismiss(animated: true, completion: nil)
         }
-        alamofireRequest(requestURL: "http://192.168.80.21:3204/api/product/create")
-        UPLOD()
+        
     }
     func UPLOAD(){
         //let image  = myImageView.image!
         let serviceName = "http://192.168.80.21:8800/api/v1/upload/uploadfile"
         var parameters = [String: AnyObject]()
         parameters["Folder"] = "uploadfile" as AnyObject?
-        parameters["Filename"] = "rabbii" as AnyObject?
-        parameters["Ext"] = "png" as AnyObject?
+        parameters["Filename"] = "RaoniX" as AnyObject?
+        parameters["Ext"] = "jpg" as AnyObject?
         
         //        let profileImageData = image
         //        if let imageData = profileImageData.jpegData(compressionQuality: 0.5) {
@@ -102,8 +117,8 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
                     multipartFormData.append(
                         value as! Data,
                         withName: key,
-                        fileName: "swift_file.png",
-                        mimeType: "image/png"
+                        fileName: "swift_file.jpg",
+                        mimeType: "image/jpg"
                     )
                 } else {
                     //Data other than image
@@ -185,18 +200,10 @@ class CreateProductVC: UIViewController, UIImagePickerControllerDelegate & UINav
         do {
             let result = try manageContent.fetch(fetchData)
             for data in result as! [NSManagedObject]{
-                //                nameProduct = data.value(forKeyPath: "name") as Any as! String
-                //                priceProduct = data.value(forKeyPath: "price") as Any as! String
-                //                descriptionProduct = data.value(forKeyPath: "proDescription") as Any as! String
-                //
                 nameProduct.append(data.value(forKey: "name") as Any as! String)
                 priceProduct.append(data.value(forKey: "price") as Any as! String)
                 descriptionProduct.append(data.value(forKey: "proDescription") as Any as! String)
-                
-                
             }
-            //            print("Name:- \(nameProduct[0])")
-            //            print("Name:- \(nameProduct[1])")
             print(nameProduct)
             print(priceProduct)
         }catch {

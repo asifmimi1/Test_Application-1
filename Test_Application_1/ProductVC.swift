@@ -31,12 +31,10 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
         super.viewDidLoad()
         tableView.delegate  = self
         tableView.dataSource = self
-        NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
         getTheData()
         fetchData()
         
         if CheckInternet.Connection(){
-            
             for _ in 0..<nameProduct.count{
                 print(count)
                 UPLOAD()
@@ -44,18 +42,48 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
                 count += 1
                 print(count)
             }
-            //            DispatchQueue.main.async { [self] in
-            deleteData()
-            //            }
-            
+            DispatchQueue.main.async { [self] in
+                deleteData()
+            }
         }
         else{
             print("Network Connection is not Available")
         }
+        present(CreateProductVC(), animated: true, completion: nil)
     }
-    
+    override func viewWillAppear(_ animated: Bool) {
+            super.viewWillAppear(true)
+            
+        tableView.reloadData()
+        getTheData()
+        fetchData()
+        if nameProduct.count != 0{
+            UPLOAD()
+            alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count])
+        }else{
+            for _ in 0..<nameProduct.count{
+                print(count)
+                UPLOAD()
+                alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count])
+                count += 1
+                print(count)
+            }
+            
+            DispatchQueue.main.async { [self] in
+                deleteData()
+            }
+            
+        }
+        }
+//    @IBAction func CallSecondViewButton(_ sender: Any) {
+//            
+//                        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//                        let controller = storyboard.instantiateViewController(withIdentifier: "CreateProductVC") as! CreateProductVC
+//                        controller.modalPresentationStyle = .fullScreen
+//                        self.present(controller, animated: true, completion: nil)
+//        }
+
     func getTheData() {
-        
         //print("Hello dear ::::::::::-\(accesstoken as Any)")
         guard let token = UserDefaults.standard.string(forKey: "accesstoken") else {
             return
@@ -63,7 +91,6 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
         let headers = [
             "x-access-token": token,
         ]
-        
         Alamofire.request("http://192.168.80.21:3204/api/product/get_all_products", headers: headers).responseJSON { [self]
             response in
             //debugPrint(response)
@@ -100,22 +127,23 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
                     //print("Test1:- \(self.image_array)")
                     UserDefaults.standard.setValue(image_array, forKey: "url")
                 }
-                
             case .failure(_):
                 print(Error.self)
             }
             self.tableView.reloadData()
-            
         }
     }
     
     @IBAction func createProductButton(_ sender: UIButton) {
-        let goToCreateProductVc = storyboard?.instantiateViewController(identifier: "CreateProductVC")
-        present(goToCreateProductVc!, animated: true, completion: nil)
+//        let goToCreateProductVc = storyboard?.instantiateViewController(identifier: "CreateProductVC")
+//        present(goToCreateProductVc!, animated: true, completion: nil)
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let controller = storyboard.instantiateViewController(withIdentifier: "CreateProductVC") as! CreateProductVC
+        controller.modalPresentationStyle = .fullScreen
+        self.present(controller, animated: true, completion: nil)
+        
     }
-    @objc func loadList(){
-        self.tableView.reloadData()
-    }
+ 
     // MARK:- Core Data- Retrieve
     func fetchData(){
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
@@ -188,9 +216,7 @@ extension ProductVC {
         goToProductDetailVC?.proDes = array_product_description[indexPath.row]
         goToProductDetailVC?.comName = array_product_compamnyName[indexPath.row]
         goToProductDetailVC?.proImg = array_product_image[indexPath.row]
-        
     }
-    
 }
 // MARK:- Network Requests
 extension ProductVC{

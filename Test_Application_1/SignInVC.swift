@@ -14,6 +14,7 @@ class SignInVCViewController: UIViewController {
     @IBOutlet weak var logInButton: UIButton!
     @IBOutlet weak var userNameField: UITextField!
     @IBOutlet weak var passwordField: UITextField!
+    let button = logInButton
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,8 +51,14 @@ class SignInVCViewController: UIViewController {
                     //print(json["role"].stringValue)
                     
                     if(self.userNameField.text == "zkrony" && self.passwordField.text == "123456"){
-                        let goToProductVC = self.storyboard?.instantiateViewController(identifier: "ProductVC")
-                        self.present(goToProductVC!, animated: true, completion: nil)
+//                        let goToProductVC = self.storyboard?.instantiateViewController(identifier: "ProductVC")
+//                        self.present(goToProductVC!, animated: true, completion: nil)
+//                        goToProductVC?.modalPresentationStyle = .fullScreen
+                        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                                            let controller = storyboard.instantiateViewController(withIdentifier: "ProductVC") as! ProductVC
+                                            
+                                            controller.modalPresentationStyle = .fullScreen
+                                            self.present(controller, animated: true, completion: nil)
                         
                         let defaults = UserDefaults.standard
                         defaults.setValue(json["accessToken"].stringValue, forKey: "accesstoken")
