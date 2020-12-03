@@ -26,8 +26,6 @@ class ProductDetailVC: UIViewController {
         super.viewDidLoad()
     }
     override func viewWillAppear(_ animated: Bool) {
-        //let url = UserDefaults.standard.object(forKey: "url")
-        //prodImage.image = proImage
         prodName.text = proName
         prodPrice.text = proPrice
         prodDescription.text = proDes

@@ -14,77 +14,109 @@ import CoreData
 class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
     
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var RefreshButton: UIButton!
     var array_product_name = [String]()
     var array_product_price = [String]()
     var array_product_image = [String]()
     var array_product_description = [String]()
     var array_product_compamnyName = [String]()
+    var array_product_id = [Int]()
     var image_array = ""
     var array = ""
     var count = 0
     var nameProduct = [String]()
     var priceProduct = [String]()
     var descriptionProduct = [String]()
-    
+    var imageProduct = [String]()
+    let CPVC = CreateProductVC()
+    var coreDataImage = ""
+    var timeStamp = "0"
+    var documentsFetchImage = UIImage()
+    var imageUrl = ""
+    var imageX = UIImage()
+    var refreshControl = UIRefreshControl()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.delegate  = self
-        tableView.dataSource = self
-        getTheData()
-        fetchData()
+        tableViewReloadGetDataFetchdata()
+        present(CreateProductVC(), animated: true, completion: nil)
         
+           refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
+           refreshControl.addTarget(self, action: #selector(self.refresh(_:)), for: .valueChanged)
+           tableView.addSubview(refreshControl) // not required when using UITableViewController
+    }
+    @objc func refresh(_ sender: AnyObject) {
+       // Code to refresh table view
+        tableViewReloadGetDataFetchdata()
+        refreshControl.endRefreshing()
+    }
+    
+    @IBAction func refreshButton(_ sender: UIButton) {
         if CheckInternet.Connection(){
-            for _ in 0..<nameProduct.count{
-                print(count)
-                UPLOAD()
-                alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count])
-                count += 1
-                print(count)
+            if nameProduct.count == 0{
+                tableViewReloadGetDataFetchdata()
             }
-            DispatchQueue.main.async { [self] in
-                deleteData()
+            else{
+                UPLOAD()
+                alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count], image: imageProduct[count])
+                DispatchQueue.main.async { [self] in
+                    deleteData()
+                }
+                tableViewReloadGetDataFetchdata()
             }
         }
         else{
             print("Network Connection is not Available")
         }
-        present(CreateProductVC(), animated: true, completion: nil)
     }
+    
+    func refreshTableView()  {
+        //        if CheckInternet.Connection(){
+        //            if nameProduct.count == 0{
+        //                tableViewReloadGetDataFetchdata()
+        //            }
+        //            else{
+        //                tableViewReloadGetDataFetchdata()
+        //                UPLOAD()
+        //                alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count], image: imageProduct[count])
+        //                DispatchQueue.main.async { [self] in
+        //                    deleteData()
+        //                }
+        //
+        //            }
+        //            print("Network Connection is Available")
+        //        }
+        //        else{
+        //            print("Network Connection is not Available")
+        //        }
+        //        tableViewReloadGetDataFetchdata()
+        self.tableViewReloadGetDataFetchdata()
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
-            super.viewWillAppear(true)
-            
-        tableView.reloadData()
-        getTheData()
-        fetchData()
-        if nameProduct.count != 0{
-            UPLOAD()
-            alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count])
-        }else{
-            for _ in 0..<nameProduct.count{
-                print(count)
-                UPLOAD()
-                alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count])
-                count += 1
-                print(count)
-            }
-            
-            DispatchQueue.main.async { [self] in
-                deleteData()
-            }
-            
-        }
-        }
-//    @IBAction func CallSecondViewButton(_ sender: Any) {
-//            
-//                        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-//                        let controller = storyboard.instantiateViewController(withIdentifier: "CreateProductVC") as! CreateProductVC
-//                        controller.modalPresentationStyle = .fullScreen
-//                        self.present(controller, animated: true, completion: nil)
-//        }
-
+        super.viewWillAppear(true)
+        //            if CheckInternet.Connection(){
+        //                if nameProduct.count == 0{
+        //                    tableViewReloadGetDataFetchdata()
+        //                }
+        //                else{
+        //                    UPLOAD()
+        //                    alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count], image: imageProduct[count])
+        //                    DispatchQueue.main.async { [self] in
+        //                        deleteData()
+        //                    }
+        //                    tableViewReloadGetDataFetchdata()
+        //                    }
+        //                }
+        //            else{
+        //                print("Network Connection is not Available")
+        //            }
+        tableViewReloadGetDataFetchdata()
+    }
+    
+    
+    
     func getTheData() {
-        //print("Hello dear ::::::::::-\(accesstoken as Any)")
         guard let token = UserDefaults.standard.string(forKey: "accesstoken") else {
             return
         }
@@ -103,11 +135,18 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
                 
                 let resultArray = myresponse
                 self.array_product_name.removeAll()
+                self.array_product_id.removeAll()
+                self.array_product_price.removeAll()
+                self.array_product_description.removeAll()
+                self.array_product_compamnyName.removeAll()
+                self.array_product_image.removeAll()
                 
                 for i in resultArray!.arrayValue{
+                    let product_id = i["product_id"].intValue
+                    self.array_product_id.append(product_id)
+                    
                     let product_name = i["product_name"].stringValue
                     self.array_product_name.append(product_name)
-                    //print("xoxoxoxox: - \(array_product_name)")
                     
                     let product_price = i["price"].stringValue
                     self.array_product_price.append(product_price)
@@ -117,33 +156,29 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
                     
                     let product_comName = i["company_name"].stringValue
                     self.array_product_compamnyName.append(product_comName)
-                    //print("Company name ::::::::::::::-\(product_comName)")
                     
                     let product_image  = i["image_url"].stringValue
                     self.array_product_image.append(product_image)
-                    //print("test ::::::::::::::-\(product_image)")
                     
                     self.image_array = product_image
-                    //print("Test1:- \(self.image_array)")
                     UserDefaults.standard.setValue(image_array, forKey: "url")
                 }
             case .failure(_):
                 print(Error.self)
             }
-            self.tableView.reloadData()
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
         }
     }
     
     @IBAction func createProductButton(_ sender: UIButton) {
-//        let goToCreateProductVc = storyboard?.instantiateViewController(identifier: "CreateProductVC")
-//        present(goToCreateProductVc!, animated: true, completion: nil)
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let controller = storyboard.instantiateViewController(withIdentifier: "CreateProductVC") as! CreateProductVC
         controller.modalPresentationStyle = .fullScreen
         self.present(controller, animated: true, completion: nil)
-        
     }
- 
+    
     // MARK:- Core Data- Retrieve
     func fetchData(){
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
@@ -152,20 +187,11 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
         do {
             let result = try manageContent.fetch(fetchData)
             for data in result as! [NSManagedObject]{
-                //                nameProduct = data.value(forKeyPath: "name") as Any as! String
-                //                priceProduct = data.value(forKeyPath: "price") as Any as! String
-                //                descriptionProduct = data.value(forKeyPath: "proDescription") as Any as! String
-                //
                 nameProduct.append(data.value(forKey: "name") as Any as! String)
                 priceProduct.append(data.value(forKey: "price") as Any as! String)
                 descriptionProduct.append(data.value(forKey: "proDescription") as Any as! String)
-                
-                
+                imageProduct.append(data.value(forKey: "imageName") as Any as! String)
             }
-            //            print("Name:- \(nameProduct[0])")
-            //            print("Name:- \(nameProduct[1])")
-            print(nameProduct)
-            print(priceProduct)
         }catch {
             print("err")
         }
@@ -189,9 +215,9 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
         }
     }
 }
+
 // MARK:- TableView
 extension ProductVC {
-    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 130
     }
@@ -200,9 +226,7 @@ extension ProductVC {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? CellTableViewCell
-        
         cell?.productName.text = array_product_name[indexPath.row]
         cell?.productPrice.text = array_product_price[indexPath.row]
         cell?.productImageLbl.sd_setImage(with: URL(string: array_product_image[indexPath.row]))
@@ -217,66 +241,69 @@ extension ProductVC {
         goToProductDetailVC?.comName = array_product_compamnyName[indexPath.row]
         goToProductDetailVC?.proImg = array_product_image[indexPath.row]
     }
+    
 }
 // MARK:- Network Requests
 extension ProductVC{
+    
+    func getSavedImage(named: String) -> UIImage? {
+        if let dir = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false) {
+            return UIImage(contentsOfFile: URL(fileURLWithPath: dir.absoluteString).appendingPathComponent(named).path)
+        }
+        return nil
+    }
+    
     func UPLOAD(){
-        //let image  = myImageView.image!
-        let serviceName = "http://192.168.80.21:8800/api/v1/upload/uploadfile"
-        var parameters = [String: AnyObject]()
-        parameters["Folder"] = "uploadfile" as AnyObject?
-        parameters["Filename"] = "rabbii" as AnyObject?
-        parameters["Ext"] = "png" as AnyObject?
+        guard let time = UserDefaults.standard.string(forKey: "timeStamp") else {
+            return
+        }
+        imageUrl = time
+        print(time)
+        print(imageProduct)
         
-        //        let profileImageData = image
-        //        if let imageData = profileImageData.jpegData(compressionQuality: 0.5) {
-        //            parameters["FileToUpload"] = imageData as AnyObject?
-        //        } else {
-        //            print("Image problem")
-        //        }
+        imageX = loadImageFromDocumentDirectory(nameOfImage: "\(time)")
         
+        var parameters = [String: Any]()
+        parameters["Folder"] = "uploadfile"
+        parameters["Filename"] = "demo3\(time)"
+        parameters["Ext"] = "png"
+        parameters["FileToUpload"] = imageX.jpegData(compressionQuality: 0.002)
         guard let token = UserDefaults.standard.string(forKey: "accesstoken") else {
             return
         }
-        let headers: HTTPHeaders = [
-            "x-access-token": token
-        ]
-        
-        //        saveImage(imageName: "newImg", image: myImageView.image!)
+        print("Create button ACCESS KEY::::- \(token)")
+        let headers = ["x-access-token": token]
         
         Alamofire.upload(multipartFormData: { (multipartFormData:MultipartFormData) in
             for (key, value) in parameters {
                 if key == "FileToUpload" {
                     multipartFormData.append(
                         value as! Data,
-                        withName: key,
-                        fileName: "swift_file.png",
+                        withName: "\(key)",
+                        fileName: "demo3\(time)",
                         mimeType: "image/png"
                     )
-                } else {
-                    //Data other than image
-                    multipartFormData.append((value as! String).data(using: .utf8)!, withName: key)
+                }
+                else {
+                    //                    multipartFormData.append((value as! String).data(using: .utf8)!, withName: key)
+                    multipartFormData.append((value as AnyObject).data(using: String.Encoding.utf8.rawValue)!, withName: key)
                 }
             }
-        }, usingThreshold: 1, to: serviceName, method: .post, headers: headers) { (encodingResult:SessionManager.MultipartFormDataEncodingResult) in
+        },usingThreshold: 1, to: "http://192.168.80.21:8800/api/v1/upload/uploadfile", method: .post, headers: headers) { (encodingResult:SessionManager.MultipartFormDataEncodingResult) in
             switch encodingResult {
+            
             case .success(let upload, _, _):
-                upload.responseJSON { [] response in
-                    
-                    if let Response = response.result.value as? [String : Any],
-                       let myData = Response["data"] as? [String : Any],
-                       let imgPath = myData["ImagePath"]  {
-                        //                        imageUrl = imgPath as! String
-                        //print(imageUrl)
-                        //print("ImagePath --> ", imgPath)
-                        let defaults = UserDefaults.standard
-                        //                        defaults.setValue(imageUrl, forKey: "imageURL")
-                        //                        let key = defaults.object(forKey: "imageURL")
-                        //                        print(key as Any)
+                upload.responseJSON { [self] response in
+                    let json = response.result.value as? [String: Any]
+                    if let status = json?["status"] as? Int{
+                        print(status)
+                        if status != 200{
+                            self.UPLOAD()
+                        }else{
+                            tableViewReloadGetDataFetchdata()
+                        }
                     }
-                    if let data = response.result.value {
-                        let _ = JSON(data)
-                    }
+                    print(response.result.value!)
                 }
                 break
             case .failure(let encodingError):
@@ -286,14 +313,7 @@ extension ProductVC{
         }
     }
     // MARK:- Get product with Alamofire Get
-    func alamoFireRequest(requestURL: String, name: String, price: String, descrip: String) {
-        //        guard let imageU = UserDefaults.standard.string(forKey: "imageURL") else {
-        //            return
-        //        //        }
-        //        for i in nameProduct{
-        //            print(i)
-        //        }
-        
+    func alamoFireRequest(requestURL: String, name: String, price: String, descrip: String, image : String) {
         let parameters: [String: Any] = [
             "product_name" : name,
             "price" : price,
@@ -301,7 +321,7 @@ extension ProductVC{
             "company_id" : "27",
             "category_id" : "1",
             "sub_category_id" : "1",
-            "image_url" : "https://cdn-test.octopitech.com.bd/uploadfile/rabbii.png",
+            "image_url" : "http://cdn-test.octopitech.com.bd/uploadfile/demo3\(imageUrl).png",
             "date_entered" : "2020-02-20"
         ]
         guard let token = UserDefaults.standard.string(forKey: "accesstoken") else {
@@ -312,19 +332,34 @@ extension ProductVC{
         ]
         Alamofire.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers)
             .responseString { response in
-                
-                
                 switch response.result {
-                
                 case .success(let data):
-                    //print("isi: \(data)")
                     _ = JSON(data)
-                    
                 case .failure(let error):
                     print("need text")
                     print("Request failed with error: \(error)")
-                    
                 }
             }
     }
 }
+//MARK:- LoadImageFromDocumentDirectory
+extension ProductVC{
+    func loadImageFromDocumentDirectory(nameOfImage : String) -> UIImage {
+        let nsDocumentDirectory = FileManager.SearchPathDirectory.documentDirectory
+        let nsUserDomainMask = FileManager.SearchPathDomainMask.userDomainMask
+        let paths = NSSearchPathForDirectoriesInDomains(nsDocumentDirectory, nsUserDomainMask, true)
+        if let dirPath = paths.first{
+            let imageURL = URL(fileURLWithPath: dirPath).appendingPathComponent(nameOfImage)
+            let image    = UIImage(contentsOfFile: imageURL.path)
+            return image!
+        }
+        return UIImage.init(named: "default.png")!
+    }
+}
+
+extension ProductVC{
+    func tableViewReloadGetDataFetchdata() {
+        getTheData()
+    }
+}
+
