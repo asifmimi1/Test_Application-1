@@ -40,18 +40,14 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
         super.viewDidLoad()
         tableViewReloadGetDataFetchdata()
         present(CreateProductVC(), animated: true, completion: nil)
-        
-           refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
-           refreshControl.addTarget(self, action: #selector(self.refresh(_:)), for: .valueChanged)
-           tableView.addSubview(refreshControl) // not required when using UITableViewController
+//        removeCoreData()
+        refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
+        refreshControl.addTarget(self, action: #selector(self.refresh(_:)), for: .valueChanged)
+        tableView.addSubview(refreshControl) // not required when using UITableViewController
     }
     @objc func refresh(_ sender: AnyObject) {
-       // Code to refresh table view
-        tableViewReloadGetDataFetchdata()
-        refreshControl.endRefreshing()
-    }
-    
-    @IBAction func refreshButton(_ sender: UIButton) {
+        // Code to refresh table view
+        print(nameProduct)
         if CheckInternet.Connection(){
             if nameProduct.count == 0{
                 tableViewReloadGetDataFetchdata()
@@ -59,9 +55,30 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
             else{
                 UPLOAD()
                 alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count], image: imageProduct[count])
-                DispatchQueue.main.async { [self] in
-                    deleteData()
-                }
+//                DispatchQueue.main.async { [self] in
+                    removeCoreData()
+//                }
+                tableViewReloadGetDataFetchdata()
+            }
+        }
+        else{
+            print("Network Connection is not Available")
+        }
+        refreshControl.endRefreshing()
+    }
+    
+    @IBAction func refreshButton(_ sender: UIButton) {
+        print(nameProduct)
+        if CheckInternet.Connection(){
+            if nameProduct.count == 0{
+                tableViewReloadGetDataFetchdata()
+            }
+            else{
+                UPLOAD()
+                alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count], image: imageProduct[count])
+//                DispatchQueue.main.async { [self] in
+                    removeCoreData()
+//                }
                 tableViewReloadGetDataFetchdata()
             }
         }
@@ -71,47 +88,45 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
     }
     
     func refreshTableView()  {
-        //        if CheckInternet.Connection(){
-        //            if nameProduct.count == 0{
-        //                tableViewReloadGetDataFetchdata()
-        //            }
-        //            else{
-        //                tableViewReloadGetDataFetchdata()
-        //                UPLOAD()
-        //                alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count], image: imageProduct[count])
-        //                DispatchQueue.main.async { [self] in
-        //                    deleteData()
-        //                }
-        //
-        //            }
-        //            print("Network Connection is Available")
-        //        }
-        //        else{
-        //            print("Network Connection is not Available")
-        //        }
-        //        tableViewReloadGetDataFetchdata()
-        self.tableViewReloadGetDataFetchdata()
+        print(nameProduct)
+        if CheckInternet.Connection(){
+            if nameProduct.count == 0{
+                tableViewReloadGetDataFetchdata()
+            }
+            else{
+                UPLOAD()
+                alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count], image: imageProduct[count])
+//                DispatchQueue.main.async { [self] in
+                    removeCoreData()
+//                }
+                tableViewReloadGetDataFetchdata()
+            }
+        }
+        else{
+            print("Network Connection is not Available")
+        }
+        refreshControl.endRefreshing()
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(true)
-        //            if CheckInternet.Connection(){
-        //                if nameProduct.count == 0{
-        //                    tableViewReloadGetDataFetchdata()
-        //                }
-        //                else{
-        //                    UPLOAD()
-        //                    alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count], image: imageProduct[count])
-        //                    DispatchQueue.main.async { [self] in
-        //                        deleteData()
-        //                    }
-        //                    tableViewReloadGetDataFetchdata()
-        //                    }
-        //                }
-        //            else{
-        //                print("Network Connection is not Available")
-        //            }
-        tableViewReloadGetDataFetchdata()
+        print(nameProduct)
+        if CheckInternet.Connection(){
+            if nameProduct.count == 0{
+                tableViewReloadGetDataFetchdata()
+            }
+            else{
+                UPLOAD()
+                alamoFireRequest(requestURL: "http://192.168.80.21:3204/api/product/create", name: nameProduct[count], price: priceProduct[count], descrip: descriptionProduct[count], image: imageProduct[count])
+//                DispatchQueue.main.async { [self] in
+                    removeCoreData()
+//                }
+                tableViewReloadGetDataFetchdata()
+            }
+        }
+        else{
+            print("Network Connection is not Available")
+        }
+        refreshControl.endRefreshing()
     }
     
     
@@ -131,7 +146,6 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
             case .success:
                 
                 let myresponse = try? JSON(data: response.data!)
-                //print("hello\(myresponse as Any)")
                 
                 let resultArray = myresponse
                 self.array_product_name.removeAll()
@@ -198,20 +212,19 @@ class ProductVC: UIViewController, UITableViewDelegate, UITableViewDataSource{
     }
     
     // MARK:- Core Data- Delete
-    func deleteData() {
-        let appDel:AppDelegate = (UIApplication.shared.delegate as! AppDelegate)
-        let context:NSManagedObjectContext = appDel.persistentContainer.viewContext
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Profile")
-        fetchRequest.returnsObjectsAsFaults = false
+    func removeCoreData() {
+        guard let appDelegate =
+          UIApplication.shared.delegate as? AppDelegate else {
+            return
+        }
+        let managedContext = appDelegate.persistentContainer.viewContext
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Profile") // Find this name in your .xcdatamodeld file
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
         do {
-            let results = try context.fetch(fetchRequest)
-            for managedObject in results {
-                if let managedObjectData: NSManagedObject = managedObject as? NSManagedObject {
-                    context.delete(managedObjectData)
-                }
-            }
+            try managedContext.execute(deleteRequest)
         } catch let error as NSError {
-            print("Deleted all my data in myEntity error : \(error) \(error.userInfo)")
+            // TODO: handle the error
+            print(error.localizedDescription)
         }
     }
 }
@@ -258,8 +271,8 @@ extension ProductVC{
             return
         }
         imageUrl = time
-        print(time)
-        print(imageProduct)
+//        print(time)
+//        print(imageProduct)
         
         imageX = loadImageFromDocumentDirectory(nameOfImage: "\(time)")
         
@@ -277,15 +290,9 @@ extension ProductVC{
         Alamofire.upload(multipartFormData: { (multipartFormData:MultipartFormData) in
             for (key, value) in parameters {
                 if key == "FileToUpload" {
-                    multipartFormData.append(
-                        value as! Data,
-                        withName: "\(key)",
-                        fileName: "demo3\(time)",
-                        mimeType: "image/png"
-                    )
+                    multipartFormData.append(value as! Data,withName: "\(key)",fileName: "demo3\(time)",mimeType: "image/png")
                 }
                 else {
-                    //                    multipartFormData.append((value as! String).data(using: .utf8)!, withName: key)
                     multipartFormData.append((value as AnyObject).data(using: String.Encoding.utf8.rawValue)!, withName: key)
                 }
             }
@@ -360,6 +367,7 @@ extension ProductVC{
 extension ProductVC{
     func tableViewReloadGetDataFetchdata() {
         getTheData()
+        fetchData()
     }
 }
 

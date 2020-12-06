@@ -18,6 +18,7 @@
 		73A16033254814E600671DD7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 73A16031254814E600671DD7 /* Main.storyboard */; };
 		73A16035254814EA00671DD7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 73A16034254814EA00671DD7 /* Assets.xcassets */; };
 		73A16038254814EA00671DD7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 73A16036254814EA00671DD7 /* LaunchScreen.storyboard */; };
+		73AEB1BA257CE65F00BE4EDA /* Method_Class.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AEB1B9257CE65F00BE4EDA /* Method_Class.swift */; };
 		73C8B66A2553C484002AF441 /* CreateProductVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73C8B6692553C484002AF441 /* CreateProductVC.swift */; };
 		73E410C62560F9520088045B /* CheckInternet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73E410C52560F9520088045B /* CheckInternet.swift */; };
 		73E410CF2561271B0088045B /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 73E410CD2561271B0088045B /* CoreData.xcdatamodeld */; };
@@ -39,6 +40,7 @@
 		73A16034254814EA00671DD7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		73A16037254814EA00671DD7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		73A16039254814EA00671DD7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		73AEB1B9257CE65F00BE4EDA /* Method_Class.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Method_Class.swift; sourceTree = "<group>"; };
 		73C8B6692553C484002AF441 /* CreateProductVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateProductVC.swift; sourceTree = "<group>"; };
 		73E410C52560F9520088045B /* CheckInternet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInternet.swift; sourceTree = "<group>"; };
 		73E410CE2561271B0088045B /* CoreData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreData.xcdatamodel; sourceTree = "<group>"; };
@@ -132,6 +134,7 @@
 		73A160432548162A00671DD7 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				73AEB1B9257CE65F00BE4EDA /* Method_Class.swift */,
 				73E410CD2561271B0088045B /* CoreData.xcdatamodeld */,
 				73E410F6256129FC0088045B /* DatabaseHelper.swift */,
 				73E410C52560F9520088045B /* CheckInternet.swift */,
@@ -260,6 +263,7 @@
 				73E410C62560F9520088045B /* CheckInternet.swift in Sources */,
 				73A1602C254814E600671DD7 /* AppDelegate.swift in Sources */,
 				73A1602E254814E600671DD7 /* SceneDelegate.swift in Sources */,
+				73AEB1BA257CE65F00BE4EDA /* Method_Class.swift in Sources */,
 				736C94D3254A8C5500B58A17 /* SignInVC.swift in Sources */,
 				737D1DDD2552AF6800153EEC /* CellTableViewCell.swift in Sources */,
 				73C8B66A2553C484002AF441 /* CreateProductVC.swift in Sources */,
